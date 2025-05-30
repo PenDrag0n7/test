@@ -1,11 +1,11 @@
-let apiKey = ttsrv.userVars["apiKey"];
-let model = ttsrv.userVars["model"] || "tts-1-hd"; // fallback to tts-1-hd
+let apiKey = ttsrv.userVars["apiKey"] || "empty-api-key"
+let model = ttsrv.userVars["model"] || "tts-1"; // fallback to tts-1-hd
 
 let PluginJS = {
-    name: 'ChatGPT',
-    id: 'speech.openai.com',
+    name: 'OpenAI-Compatible',
+    id: 'openai.compatible.tts',
     author: 'TTS Server',
-    description: 'OpenAI TTS with HD support',
+    description: 'Support Koroku TTS, Orpheus and other 3rd party',
     version: 1,
 
     vars: {
@@ -28,7 +28,7 @@ let PluginJS = {
         };
 
         let str = JSON.stringify(body);
-        let resp = ttsrv.httpPost('https://api.openai.com/v1/audio/speech', str, reqHeaders);
+        let resp = ttsrv.httpPost('http://192.168.0.80:5005/v1/audio/speech', str, reqHeaders);
 
         if (resp.isSuccessful()) {
             return resp.body().byteStream();
@@ -51,12 +51,8 @@ let EditorJS = {
 
     getVoices: function (locale) {
         return {
-            'nova': 'Nova (female)',
-            'shimmer': 'Shimmer (female)',
-            'onyx': 'Onyx (male)',
-            'echo': 'Echo (male)',
-            'fable': 'Fable (nonbinary)',
-            'alloy': 'Alloy (male)'
+            'tara': 'Tara (female)',
+            'leach': 'Leach (female)',
         };
     },
 
