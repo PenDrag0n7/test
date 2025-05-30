@@ -1,15 +1,15 @@
 let apiKey = ttsrv.userVars["apiKey"] || "empty-api-key";
-let baseUrl = ttsrv.userVars["baseUrl"] || "http://192.168.0.80:5005"; // default URL
+let baseUrl = ttsrv.userVars["baseUrl"] || "http://192.168.0.80:5005"; // default local URL
 
 let PluginJS = {
     name: 'OpenAI-Compatible',
     id: 'openai.compatible.tts',
     author: 'TTS Server',
-    description: 'Supports Koroko-TTS, Orpheus, and other OpenAI-compatible TTS APIs',
+    description: 'Supports Koroko-TTS, Orpheus, and other OpenAI-compatible TTS servers',
     version: 1,
 
     vars: {
-        apiKey: { label: "API-KEY", hint: "Optional, depending on server" },
+        apiKey: { label: "API-KEY", hint: "Optional depending on server" },
         baseUrl: { label: "Base URL", hint: "e.g. http://localhost:5005" }
     },
 
@@ -20,7 +20,7 @@ let PluginJS = {
         };
 
         let body = {
-            model: "tts-1", // Use model name expected by backend
+            model: "tts-1",
             input: text,
             voice: voice,
             speed: 1.0,
@@ -51,8 +51,14 @@ let EditorJS = {
 
     getVoices: function (locale) {
         return {
-            'tara': 'Tara (female)',
-            'leach': 'Leach (female)'
+            'tara': 'Tara — Female, conversational, clear',
+            'leah': 'Leah — Female, warm, gentle',
+            'jess': 'Jess — Female, energetic, youthful',
+            'leo': 'Leo — Male, authoritative, deep',
+            'dan': 'Dan — Male, friendly, casual',
+            'mia': 'Mia — Female, professional, articulate',
+            'zac': 'Zac — Male, enthusiastic, dynamic',
+            'zoe': 'Zoe — Female, calm, soothing'
         };
     },
 
