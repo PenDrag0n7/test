@@ -51,6 +51,7 @@ let EditorJS = {
 
     getVoices: function (locale) {
         return {
+    
             'tara': 'Tara — Female, conversational, clear',
             'leah': 'Leah — Female, warm, gentle',
             'jess': 'Jess — Female, energetic, youthful',
@@ -58,7 +59,15 @@ let EditorJS = {
             'dan': 'Dan — Male, friendly, casual',
             'mia': 'Mia — Female, professional, articulate',
             'zac': 'Zac — Male, enthusiastic, dynamic',
-            'zoe': 'Zoe — Female, calm, soothing'
+            'zoe': 'Zoe — Female, calm, soothing',
+
+            //OpenAI-compatible voices
+            'alloy': 'Alloy',
+            'echo': 'Echo',
+            'nova': 'Nova',
+            'shimmer': 'Shimmer',
+            'Onyx': 'Onyx',
+            'Fable': 'Fable',
         };
     },
 
