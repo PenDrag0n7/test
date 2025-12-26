@@ -1,40 +1,39 @@
-// Async.ai TTS Plugin (streaming raw PCM)
+// Async.ai TTS Plugin (streaming octet-stream audio)
 let apiKey     = ttsrv.userVars["apiKey"] || "empty-api-key";
 let baseUrl    = ttsrv.userVars["baseUrl"] || "https://api.async.ai";
-let sampleRate = parseInt(ttsrv.userVars["sampleRate"]) || 44100;
+let apiVersion = ttsrv.userVars["apiVersion"] || "v1";
 
+let sampleRate = parseInt(ttsrv.userVars["sampleRate"]) || 44100;
 let modelId    = ttsrv.userVars["modelId"] || "asyncflow_v2.0";
 
-// Output format (matches the sample curl)
-let container  = ttsrv.userVars["container"] || "raw";        // raw | (maybe wav, mp3 - depends on Async)
-let encoding   = ttsrv.userVars["encoding"] || "pcm_s16le";   // pcm_s16le etc.
+// Output format (per Async docs example)
+let container  = ttsrv.userVars["container"] || "raw";
+let encoding   = ttsrv.userVars["encoding"] || "pcm_f32le"; // docs example uses pcm_f32le
 
 let PluginJS = {
     name: 'Async.ai',
     id: 'async.ai.tts',
     author: 'TTS Server (custom)',
-    description: 'Async.ai text-to-speech via /text_to_speech/streaming',
+    description: 'Async.ai text-to-speech streaming via /text_to_speech/streaming',
     version: 1,
 
     vars: {
-        apiKey:     { label: "API-KEY", hint: "Async.ai X-Api-Key" },
-        baseUrl:    { label: "Base URL", hint: "https://api.async.ai", default: "https://api.async.ai" },
-        modelId:    { label: "Model ID", hint: "e.g. asyncflow_v2.0", default: "asyncflow_v2.0" },
-        sampleRate: { label: "Sample Rate", hint: "e.g. 44100", default: "44100" },
-        container:  { label: "Container", hint: "raw (default). If your player needs wav/mp3, try those if Async supports it.", default: "raw" },
-        encoding:   { label: "Encoding", hint: "pcm_s16le (default)", default: "pcm_s16le" }
+        apiKey:      { label: "API-KEY", hint: "Async x-api-key" },
+        baseUrl:     { label: "Base URL", hint: "https://api.async.ai", default: "https://api.async.ai" },
+        apiVersion:  { label: "API Version", hint: "Send as header: version (e.g. v1)", default: "v1" },
+        modelId:     { label: "Model ID", hint: "e.g. asyncflow_v2.0", default: "asyncflow_v2.0" },
+        sampleRate:  { label: "Sample Rate", hint: "e.g. 44100", default: "44100" },
+        container:   { label: "Container", hint: "raw (common for streaming)", default: "raw" },
+        encoding:    { label: "Encoding", hint: "e.g. pcm_f32le, pcm_s16le (depends what your player supports)", default: "pcm_f32le" }
     },
 
-    // text, locale, voice, speed, volume, pitch are provided by host
     getAudio: function (text, locale, voice, speed, volume, pitch) {
-        // Async.ai uses X-Api-Key (NOT Authorization: Bearer)
         let reqHeaders = {
             'Content-Type': 'application/json',
-            'X-Api-Key': apiKey
+            'x-api-key': apiKey,
+            'version': apiVersion
         };
 
-        // Host passes "voice" string; we treat it as Async voice "id"
-        // (You can also implement "mode":"name" if Async supports it.)
         let body = {
             model_id: modelId,
             transcript: text,
@@ -49,19 +48,15 @@ let PluginJS = {
             }
         };
 
-        // Optional: map host speed (if provided) to something you control.
-        // Async sample doesn't show speed. If Async supports it, add it here.
-        // Example:
-        // if (typeof speed === "number" && !isNaN(speed)) body.speed = speed;
-
         let str = JSON.stringify(body);
         let resp = ttsrv.httpPost(baseUrl + '/text_to_speech/streaming', str, reqHeaders);
 
         if (resp.isSuccessful()) {
-            // For container=raw, this is typically raw PCM bytes.
+            // Returns application/octet-stream. Docs note quota errors may appear as bytes in-stream.
+            // If your host lets you inspect bytes, you can optionally detect:
+            // b"--ERROR:QUOTA_EXCEEDED--"
             return resp.body().byteStream();
         } else {
-            // If Async returns useful error text, you may want resp.body().string() (if available in your host)
             throw "FAILED: status=" + resp.code();
         }
     }
@@ -79,12 +74,9 @@ let EditorJS = {
     },
 
     getVoices: function (locale) {
-        // Async voices are usually IDs (UUIDs). Put your real IDs here.
-        // The "key" MUST be what you want passed into PluginJS.getAudio as `voice`.
         return {
+            // Put your Async voice IDs here (UUID strings)
             'e0f39dc4-f691-4e78-bba5-5c636692cc04': 'Async Voice (example) — e0f39dc4…'
-            // Add more:
-            // 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx': 'My Other Voice'
         };
     },
 
